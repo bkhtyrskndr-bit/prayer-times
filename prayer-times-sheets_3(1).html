@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jamat Times</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #e8e0d4;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 24px 16px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .card {
+    background: #faf7f2;
+    border: 1px solid #d6cfc4;
+    border-radius: 20px;
+    padding: 24px 20px 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 0 #fff inset;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #b8860b, #d4a843, #c8972a, #b8860b);
+  }
+  .header { text-align: center; margin-bottom: 18px; }
+  .header-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
+  .crescent { font-size: 20px; line-height: 1; }
+  .header h1 { font-family: 'Amiri', serif; font-size: 26px; color: #7a5c1e; letter-spacing: 0.5px; line-height: 1; }
+  .header .subtitle { font-size: 11px; color: #9e8e72; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 5px; }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, #d6cfc4, #c8a03c60, #d6cfc4, transparent); margin: 14px 0; }
+  .masjid { margin-bottom: 14px; }
+  .masjid-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+  .masjid-header .icon { font-size: 13px; }
+  .masjid-name { font-size: 13px; font-weight: 600; color: #7a5c1e; letter-spacing: 0.3px; flex: 1; }
+  .masjid-addr { font-size: 10px; color: #b0a090; letter-spacing: 0.5px; }
+  .times-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .time-cell { background: #f2ede4; border: 1px solid #e0d8cc; border-radius: 8px; padding: 7px 4px; text-align: center; }
+  .time-cell .label { font-size: 9px; color: #a08060; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; display: block; }
+  .time-cell .value { font-size: 15px; font-weight: 600; color: #3a2e1e; letter-spacing: 0.3px; line-height: 1; }
+  .time-cell .value.small { font-size: 10px; color: #8a7a60; line-height: 1.4; }
+  .weekly-section { margin-bottom: 14px; }
+  .weekly-label { font-size: 10px; color: #a08060; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .weekly-label::after { content: ''; flex: 1; height: 1px; background: #e0d8cc; }
+  .weekly-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .day-cell { text-align: center; background: #f2ede4; border: 1px solid #e0d8cc; border-radius: 6px; padding: 5px 2px; }
+  .day-cell .day-name { font-size: 8px; color: #b0a090; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
+  .day-cell .day-time { font-size: 11px; font-weight: 600; color: #3a2e1e; }
+  .jumua-section { margin-bottom: 14px; }
+  .section-label { font-size: 10px; color: #a08060; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #e0d8cc; }
+  .jumua-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .jumua-cell { background: #fdf4e0; border: 1px solid #e8d49a; border-radius: 8px; padding: 7px 5px; text-align: center; }
+  .jumua-cell .j-name { font-size: 9px; color: #9e7e3a; display: block; margin-bottom: 4px; letter-spacing: 0.3px; }
+  .jumua-cell .j-time { font-size: 16px; font-weight: 700; color: #7a5c1e; }
+  .footer { text-align: center; font-size: 10px; color: #c0b09a; letter-spacing: 0.8px; padding-top: 6px; }
+
+  /* Loading & error states */
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9e8e72;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  .loading .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid #e0d8cc;
+    border-top-color: #c8a03c;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error {
+    text-align: center;
+    padding: 20px;
+    color: #b05030;
+    font-size: 12px;
+    background: #fff5f0;
+    border: 1px solid #f0c8b0;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="loading">
+    <div class="spinner"></div>
+    Loading times…
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwa1acVUp0h4Jqx3dc7BdMM_ENaSz_RyLvndyOlBYrv5Ta5qp7hkQ12gjCgTeHDEYg4/exec';
+
+async function loadTimes() {
+  const card = document.getElementById('card');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL);
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+
+    const g = (key, fallback = '—') => data[key] || fallback;
+
+    card.innerHTML = `
+      <div class="header">
+        <div class="header-top">
+          <span class="crescent">☪</span>
+          <h1>Jamāʿat Times</h1>
+          <span class="crescent">☪</span>
+        </div>
+        <div class="subtitle">From ${g('week_start')} · Batley</div>
+      </div>
+
+      <!-- JAME MASJID -->
+      <div class="masjid">
+        <div class="masjid-header">
+          <span class="icon">🕌</span>
+          <span class="masjid-name">Jame Masjid</span>
+          <span class="masjid-addr">Henry Street</span>
+        </div>
+        <div class="times-grid">
+          <div class="time-cell"><span class="label">Fajr</span><span class="value">${g('jame_fajr')}</span></div>
+          <div class="time-cell"><span class="label">Dhuhr</span><span class="value">${g('jame_dhuhr')}</span></div>
+          <div class="time-cell"><span class="label">Asr</span><span class="value">${g('jame_asr')}</span></div>
+          <div class="time-cell"><span class="label">Isha</span><span class="value small">${g('jame_isha')}</span></div>
+        </div>
+      </div>
+
+      <!-- JUMMA MASJID -->
+      <div class="masjid">
+        <div class="masjid-header">
+          <span class="icon">🕌</span>
+          <span class="masjid-name">Jumma Masjid</span>
+          <span class="masjid-addr">Bradford Road</span>
+        </div>
+        <div class="times-grid">
+          <div class="time-cell"><span class="label">Fajr</span><span class="value">${g('jumma_fajr')}</span></div>
+          <div class="time-cell"><span class="label">Dhuhr</span><span class="value">${g('jumma_dhuhr')}</span></div>
+          <div class="time-cell"><span class="label">Asr</span><span class="value">${g('jumma_asr')}</span></div>
+          <div class="time-cell"><span class="label">Isha</span><span class="value small">${g('jumma_isha')}</span></div>
+        </div>
+      </div>
+
+      <!-- HILAL -->
+      <div class="masjid">
+        <div class="masjid-header">
+          <span class="icon">🕌</span>
+          <span class="masjid-name">HILAL</span>
+          <span class="masjid-addr">Bosnian Cultural Society</span>
+        </div>
+        <div class="times-grid">
+          <div class="time-cell"><span class="label">Fajr</span><span class="value">${g('hilal_fajr')}</span></div>
+          <div class="time-cell"><span class="label">Dhuhr</span><span class="value">${g('hilal_dhuhr')}</span></div>
+          <div class="time-cell"><span class="label">Asr</span><span class="value">${g('hilal_asr')}</span></div>
+          <div class="time-cell"><span class="label">Isha</span><span class="value">${g('hilal_isha')}</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- JUMU'AH -->
+      <div class="jumua-section">
+        <div class="section-label">🕋 Jumu'ah</div>
+        <div class="jumua-grid">
+          <div class="jumua-cell"><span class="j-name">Jame Masjid</span><span class="j-time">${g('jumua_jame')}</span></div>
+          <div class="jumua-cell"><span class="j-name">HILAL</span><span class="j-time">${g('jumua_hilal')}</span></div>
+          <div class="jumua-cell"><span class="j-name">Jumma Masjid</span><span class="j-time">${g('jumua_jumma')}</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ISHA WEEKLY -->
+      <div class="weekly-section">
+        <div class="weekly-label">🌙 Isha Weekly — Jame Masjid</div>
+        <div class="weekly-grid">
+          <div class="day-cell"><span class="day-name">Sat</span><span class="day-time">${g('jame_isha_sat')}</span></div>
+          <div class="day-cell"><span class="day-name">Sun</span><span class="day-time">${g('jame_isha_sun')}</span></div>
+          <div class="day-cell"><span class="day-name">Mon</span><span class="day-time">${g('jame_isha_mon')}</span></div>
+          <div class="day-cell"><span class="day-name">Tue</span><span class="day-time">${g('jame_isha_tue')}</span></div>
+          <div class="day-cell"><span class="day-name">Wed</span><span class="day-time">${g('jame_isha_wed')}</span></div>
+          <div class="day-cell"><span class="day-name">Thu</span><span class="day-time">${g('jame_isha_thu')}</span></div>
+          <div class="day-cell"><span class="day-name">Fri</span><span class="day-time">${g('jame_isha_fri')}</span></div>
+        </div>
+      </div>
+
+      <!-- SUNRISE -->
+      <div class="weekly-section">
+        <div class="weekly-label">🌅 Sunrise</div>
+        <div class="weekly-grid">
+          <div class="day-cell"><span class="day-name">Sat</span><span class="day-time">${g('sunrise_sat')}</span></div>
+          <div class="day-cell"><span class="day-name">Sun</span><span class="day-time">${g('sunrise_sun')}</span></div>
+          <div class="day-cell"><span class="day-name">Mon</span><span class="day-time">${g('sunrise_mon')}</span></div>
+          <div class="day-cell"><span class="day-name">Tue</span><span class="day-time">${g('sunrise_tue')}</span></div>
+          <div class="day-cell"><span class="day-name">Wed</span><span class="day-time">${g('sunrise_wed')}</span></div>
+          <div class="day-cell"><span class="day-name">Thu</span><span class="day-time">${g('sunrise_thu')}</span></div>
+          <div class="day-cell"><span class="day-name">Fri</span><span class="day-time">${g('sunrise_fri')}</span></div>
+        </div>
+      </div>
+
+      <!-- MAGHRIB -->
+      <div class="weekly-section">
+        <div class="weekly-label">🌇 Maghrib</div>
+        <div class="weekly-grid">
+          <div class="day-cell"><span class="day-name">Sat</span><span class="day-time">${g('maghrib_sat')}</span></div>
+          <div class="day-cell"><span class="day-name">Sun</span><span class="day-time">${g('maghrib_sun')}</span></div>
+          <div class="day-cell"><span class="day-name">Mon</span><span class="day-time">${g('maghrib_mon')}</span></div>
+          <div class="day-cell"><span class="day-name">Tue</span><span class="day-time">${g('maghrib_tue')}</span></div>
+          <div class="day-cell"><span class="day-name">Wed</span><span class="day-time">${g('maghrib_wed')}</span></div>
+          <div class="day-cell"><span class="day-name">Thu</span><span class="day-time">${g('maghrib_thu')}</span></div>
+          <div class="day-cell"><span class="day-name">Fri</span><span class="day-time">${g('maghrib_fri')}</span></div>
+        </div>
+      </div>
+
+      <div class="footer">All times are approximate · Verify locally</div>
+    `;
+
+  } catch (err) {
+    card.innerHTML = `
+      <div class="header">
+        <div class="header-top">
+          <span class="crescent">☪</span>
+          <h1>Jamāʿat Times</h1>
+          <span class="crescent">☪</span>
+        </div>
+      </div>
+      <div class="error">
+        ⚠️ Could not load times — check your internet connection and try again.<br><br>
+        <small>${err.message}</small>
+      </div>
+    `;
+  }
+}
+
+loadTimes();
+</script>
+</body>
+</html>
